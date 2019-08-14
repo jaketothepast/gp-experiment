@@ -11,7 +11,6 @@ for i = 1:length(header)
     header[i] = tmp
 end
 header = dropdims(reshape(header, :, 1), dims=2)
-
 df = DataFrames.DataFrame()
 
 # Finally, construct our dataframe
@@ -33,4 +32,13 @@ function search(candidates)
     parents = candidates[1:3]
 end
 
-search(generateCandidatePool())
+function randRow()
+    # Generate a random row index
+    abs(rand(Int) % size(df, 1))
+end
+
+function randomCandidate(n)
+    # Select n random rows from the dataset.
+    rows = [randRow() for i = 1:n]
+    df[rows, :]
+end
