@@ -1,6 +1,10 @@
 import ExcelReaders
 import DataFrames
 
+POPSIZE = 5
+mu = 1
+lambda = 4
+
 data = ExcelReaders.readxlsheet("./data/nutrional_information_5917.xlsx", "Sheet2", skipstartrows=1)
 header = ExcelReaders.readxlsheet("./data/nutrional_information_5917.xlsx", "Sheet2", nrows=1)
 
@@ -21,10 +25,11 @@ end
 function breeder(parent)
 end
 
-function fitness(candidate)
+function fitness(candidate::DataFrames.DataFrame)
+    sum(+, candidate[:Calories])
 end
 
-function search(candidates)
+function breed(candidates::Array{DataFrames.DataFrame})
     # Truncation selection, top 3 as parents.
     # First, check everyone's fitness.  
     # Then, generate new solutions by selecting parents and breeding
@@ -37,8 +42,14 @@ function randRow()
     abs(rand(Int) % size(df, 1))
 end
 
-function randomCandidate(n)
+function randomCandidate(n::Integer)
     # Select n random rows from the dataset.
     rows = [randRow() for i = 1:n]
     df[rows, :]
 end
+
+function generateInitialPopulation()
+    [randomCandidate(5) for i = 1:POPSIZE]
+end
+
+# search(generateInitialPopulation())
