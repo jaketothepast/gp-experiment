@@ -42,7 +42,7 @@ end
 
 function randRow()
     # Generate a random row index
-    abs(rand(Int) % size(df, 1))
+    abs(rand(Int) % size(df, 1)) + 1
 end
 
 function randomCandidate(n::Integer)
@@ -57,6 +57,7 @@ end
 
 function main()
     # Generate the initial population.
+    println("Entering main.")
     pop = generateInitialPopulation(lambda, 4)
     best = nothing
     generationNum = 0
@@ -64,6 +65,7 @@ function main()
     parents = nothing
 
     while generationNum != GENLIMIT || (best != nothing && fitness(best) != 0)
+        println("Generation $generationNum")
 
         # Assess the fitness of parents
         for parent in pop
@@ -75,17 +77,21 @@ function main()
 
         bestFitness = fitness(best)
 
+        println("Sorting by fitness")
         sort!(pop, by = x -> fitness(x))
         parents = pop[1:mu]
         pop = parents
 
+        println("Breeding new generation")
+        print("Parents $parents")
         for p in parents
-            for i = 1:(lambda/mu)
+            for i = 1:4
+                print("breed")
                 push!(pop, mutate(p))
             end
         end
 
-        println("Generation $generationNum, best $best, fitness $bestFitness")
+        print("Generation $generationNum, best $best, fitness $bestFitness")
         generationNum += 1
     end
 
