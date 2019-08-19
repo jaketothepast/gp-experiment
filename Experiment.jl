@@ -35,13 +35,11 @@ function mutate(parent)
 
     # Copy the parent so we can do some work.
     child = deepcopy(parent)
-    rowsDeleted = 0
     toDelete = []
 
     for i in 1:size(parent, 1)
         if rand(Float64) > 0.5 # NOTE: make this tunable
             push!(toDelete, i)
-            rowsDeleted += 1
         end
         # If we get tails, delete the row and push a new one to it.
     end
@@ -50,7 +48,7 @@ function mutate(parent)
     DataFrames.deleterows!(child, toDelete)
 
     # Add new random rows from the ones we deleted
-    for i in 1:rowsDeleted
+    for i in 1:length(toDelete)
         push!(child, df[randRow(), :])
     end
 
@@ -90,7 +88,7 @@ end
 
 
 """
-    generateInitialPopulation(lambda::Integer, candidateSize::Integer)
+generateInitialPopulation(lambda::Integer, candidateSize::Integer)
 
 From our dataset, generate an array of initial candidates to begin the search.
 """
