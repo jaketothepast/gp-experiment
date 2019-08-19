@@ -39,7 +39,6 @@ function fitness(candidate::DataFrames.DataFrame)
     abs(TARGETCALORIES - sum(+, candidate[:Calories]))
 end
 
-
 function randRow()
     # Generate a random row index
     abs(rand(Int) % size(df, 1)) + 1
@@ -80,18 +79,18 @@ function main()
         println("Sorting by fitness")
         sort!(pop, by = x -> fitness(x))
         parents = pop[1:mu]
-        pop = parents
+        pop = deepcopy(parents)
 
         println("Breeding new generation")
         print("Parents $parents")
         for p in parents
-            for i = 1:4
-                print("breed")
+            for i = 1:(lambda/mu)
+                println("breed")
                 push!(pop, mutate(p))
             end
         end
 
-        print("Generation $generationNum, best $best, fitness $bestFitness")
+        println("Generation $generationNum, best $best, fitness $bestFitness")
         generationNum += 1
     end
 
