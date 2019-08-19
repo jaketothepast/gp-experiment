@@ -5,7 +5,7 @@ POPSIZE = 5
 mu = 1
 lambda = 4
 GENLIMIT = 20
-TARGETCALORIES = 1000
+TARGETCALORIES = 2000
 
 data = ExcelReaders.readxlsheet("./data/nutrional_information_5917.xlsx", "Sheet2", skipstartrows=1)
 header = ExcelReaders.readxlsheet("./data/nutrional_information_5917.xlsx", "Sheet2", nrows=1)
@@ -24,8 +24,34 @@ for i = 1:length(header)
     df[header[i]] = data[2:end, i]
 end
 
+"""
+Step through the parent, and randomly delete and update rows.S
+"""
 function mutate(parent)
-    randomCandidate(4)
+
+    # Copy the parent so we can do some work.
+    child = deepcopy(parent)
+    rowsDeleted = 0
+    toDelete = []
+
+    for i in 1:size(parent, 1)
+        if rand(Float64) > 0.5 # NOTE: make this tunable
+            push!(toDelete, i)
+            rowsDeleted += 1
+        end
+        # If we get tails, delete the row and push a new one to it.
+    end
+
+    println("TO DELETE $toDelete")
+    # Delete all rows we don't want at once.
+    DataFrames.deleterows!(child, toDelete)
+
+    # Add new random rows from the ones we deleted
+    for i in 1:rowsDeleted
+        push!(child, df[randRow(), :])
+    end
+
+    child
 end
 
 """
@@ -63,7 +89,7 @@ function main()
     fit = nothing
     parents = nothing
 
-    while generationNum != GENLIMIT || (best != nothing && fitness(best) != 0)
+    while generationNum <= GENLIMIT
         println("Generation $generationNum")
 
         # Assess the fitness of parents
@@ -85,7 +111,6 @@ function main()
         print("Parents $parents")
         for p in parents
             for i = 1:(lambda/mu)
-                println("breed")
                 push!(pop, mutate(p))
             end
         end
