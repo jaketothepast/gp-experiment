@@ -25,7 +25,11 @@ for i = 1:length(header)
 end
 
 """
-Step through the parent, and randomly delete and update rows.S
+Our mutator function
+
+    steps through the parent, and randomly selects the
+    allelles to delete. Will replace the alleles with new
+    alleles (meals).
 """
 function mutate(parent)
 
@@ -42,7 +46,6 @@ function mutate(parent)
         # If we get tails, delete the row and push a new one to it.
     end
 
-    println("TO DELETE $toDelete")
     # Delete all rows we don't want at once.
     DataFrames.deleterows!(child, toDelete)
 
@@ -65,24 +68,38 @@ function fitness(candidate::DataFrames.DataFrame)
     abs(TARGETCALORIES - sum(+, candidate[:Calories]))
 end
 
+"""
+Helper function to generate a random row index
+    used by randomCandidate
+"""
 function randRow()
     # Generate a random row index
     abs(rand(Int) % size(df, 1)) + 1
 end
 
+"""
+Helper function to generate a random candidate from the dataset.
+
+    n is the size of the candidate.
+"""
 function randomCandidate(n::Integer)
     # Select n random rows from the dataset.
     rows = [randRow() for i = 1:n]
     df[rows, :]
 end
 
+
+"""
+    generateInitialPopulation(lambda::Integer, candidateSize::Integer)
+
+From our dataset, generate an array of initial candidates to begin the search.
+"""
 function generateInitialPopulation(lambda::Integer, candidateSize::Integer)
     [randomCandidate(candidateSize) for i = 1:lambda]
 end
 
 function main()
     # Generate the initial population.
-    println("Entering main.")
     pop = generateInitialPopulation(lambda, 4)
     best = nothing
     generationNum = 0
@@ -90,8 +107,6 @@ function main()
     parents = nothing
 
     while generationNum <= GENLIMIT
-        println("Generation $generationNum")
-
         # Assess the fitness of parents
         for parent in pop
             fit = fitness(parent)
@@ -100,15 +115,15 @@ function main()
             end
         end
 
+        # Grab our best fitness for logging purposes.
         bestFitness = fitness(best)
 
-        println("Sorting by fitness")
+        # Copy the best mu parents into the population.
         sort!(pop, by = x -> fitness(x))
         parents = pop[1:mu]
         pop = deepcopy(parents)
 
-        println("Breeding new generation")
-        print("Parents $parents")
+        # Employ our (mu + lambda) strategy by generating lambda/mu kids.
         for p in parents
             for i = 1:(lambda/mu)
                 push!(pop, mutate(p))
