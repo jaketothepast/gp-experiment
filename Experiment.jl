@@ -6,6 +6,7 @@ mu = 1
 lambda = 4
 GENLIMIT = 20
 TARGETCALORIES = 2000
+CANDIDATESIZE = 4
 
 data = ExcelReaders.readxlsheet("./data/nutrional_information_5917.xlsx", "Sheet2", skipstartrows=1)
 header = ExcelReaders.readxlsheet("./data/nutrional_information_5917.xlsx", "Sheet2", nrows=1)
@@ -96,15 +97,16 @@ function generateInitialPopulation(lambda::Integer, candidateSize::Integer)
     [randomCandidate(candidateSize) for i = 1:lambda]
 end
 
-function main()
+function main(genLimit)
     # Generate the initial population.
-    pop = generateInitialPopulation(lambda, 4)
+    pop = generateInitialPopulation(lambda, CANDIDATESIZE)
     best = nothing
     generationNum = 0
     fit = nothing
     parents = nothing
+    results = Dict{Integer, Float64}()
 
-    while generationNum <= GENLIMIT
+    while generationNum <= genLimit
         # Assess the fitness of parents
         for parent in pop
             fit = fitness(parent)
@@ -115,6 +117,7 @@ function main()
 
         # Grab our best fitness for logging purposes.
         bestFitness = fitness(best)
+        results[generationNum+1] = bestFitness
 
         # Copy the best mu parents into the population.
         sort!(pop, by = x -> fitness(x))
@@ -128,9 +131,11 @@ function main()
             end
         end
 
-        println("Generation $generationNum, best $best, fitness $bestFitness")
+        # println("Generation $generationNum, best $best, fitness $bestFitness")
         generationNum += 1
     end
+
+    results
 
 end
 # search(generateInitialPopulation())
